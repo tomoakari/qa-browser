@@ -1,0 +1,32 @@
+# バージョン管理
+.git
+.gitignore
+.github
+
+# 依存関係
+node_modules
+npm-debug.log
+
+# ビルド成果物
+build
+.svelte-kit
+
+# 環境変数
+.env
+.env.*
+!.env.example
+
+# エディタ設定
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS固有のファイル
+.DS_Store
+Thumbs.db
+
+# その他
+README.md
+LICENSE
+*.log

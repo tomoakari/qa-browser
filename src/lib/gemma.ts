@@ -1,0 +1,41 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+// 開発環境用のダミー値を設定
+const apiKey = import.meta.env.GOOGLE_AI_API_KEY || 'dummy-api-key';
+const genAI = new GoogleGenerativeAI(apiKey);
+
+/**
+ * Gemma3モデルを使用して質問に回答する
+ * @param question 質問内容
+ * @param context コンテキスト情報（Githubから取得したデータなど）
+ * @returns 回答内容
+ */
+export async function generateAnswer(question: string, context: string) {
+  try {
+    // Gemma3モデルを使用
+    const model = genAI.getGenerativeModel({ model: 'gemma-3' });
+    
+    // プロンプトの作成
+    const prompt = `
+以下の情報を元に質問に回答してください。
+
+## コンテキスト情報
+${context}
+
+## 質問
+${question}
+
+## 回答
+`;
+    
+    // 回答の生成
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    const text = response.text();
+    
+    return { data: text, error: null };
+  } catch (error) {
+    console.error('Failed to generate answer:', error);
+    return { data: null, error };
+  }
+}
