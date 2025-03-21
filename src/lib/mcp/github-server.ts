@@ -13,8 +13,8 @@ import { Octokit } from 'octokit';
 class GithubMcpServer {
   private server: Server;
   private octokit: Octokit;
-  private repoOwner: string;
-  private repoName: string;
+  private repoOwner: string = '';
+  private repoName: string = '';
 
   constructor() {
     this.server = new Server(
@@ -30,10 +30,15 @@ class GithubMcpServer {
       }
     );
 
-    // 開発環境用のダミー値を設定
-    const githubToken = process.env.GITHUB_TOKEN || 'dummy-token';
-    this.repoOwner = process.env.GITHUB_REPO_OWNER || 'my-org';
-    this.repoName = process.env.GITHUB_REPO_NAME || 'my-qa-repo';
+    // 環境変数から値を取得
+    const githubToken = process.env.GITHUB_TOKEN || '';
+    this.repoOwner = process.env.GITHUB_REPO_OWNER || '';
+    this.repoName = process.env.GITHUB_REPO_NAME || '';
+
+    // 環境変数が設定されていない場合はエラーを表示
+    if (!githubToken || !this.repoOwner || !this.repoName) {
+      console.error('GitHub環境変数が設定されていません。');
+    }
 
     this.octokit = new Octokit({
       auth: githubToken

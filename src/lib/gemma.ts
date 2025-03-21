@@ -1,7 +1,13 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// 開発環境用のダミー値を設定
-const apiKey = import.meta.env.GOOGLE_AI_API_KEY || 'dummy-api-key';
+// 環境変数から値を取得
+const apiKey = import.meta.env.GOOGLE_AI_API_KEY;
+
+// 環境変数が設定されていない場合はエラーを表示
+if (!apiKey) {
+  console.error('Google AI API環境変数が設定されていません。');
+}
+
 const genAI = new GoogleGenerativeAI(apiKey);
 
 /**

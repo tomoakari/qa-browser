@@ -1,9 +1,14 @@
 import { Octokit } from 'octokit';
 
-// 開発環境用のダミー値を設定
-const githubToken = import.meta.env.GITHUB_TOKEN || 'dummy-token';
-const repoOwner = import.meta.env.GITHUB_REPO_OWNER || 'my-org';
-const repoName = import.meta.env.GITHUB_REPO_NAME || 'my-qa-repo';
+// 環境変数から値を取得
+const githubToken = import.meta.env.GITHUB_TOKEN;
+const repoOwner = import.meta.env.GITHUB_REPO_OWNER;
+const repoName = import.meta.env.GITHUB_REPO_NAME;
+
+// 環境変数が設定されていない場合はエラーを表示
+if (!githubToken || !repoOwner || !repoName) {
+  console.error('GitHub環境変数が設定されていません。');
+}
 
 export const octokit = new Octokit({
   auth: githubToken

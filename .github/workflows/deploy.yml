@@ -39,9 +39,9 @@ jobs:
         env:
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
           PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}
-          GITHUB_REPO_OWNER: ${{ secrets.GH_REPO_OWNER }}
-          GITHUB_REPO_NAME: ${{ secrets.GH_REPO_NAME }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
+          GITHUB_REPO_OWNER: ${{ secrets.GITHUB_REPO_OWNER }}
+          GITHUB_REPO_NAME: ${{ secrets.GITHUB_REPO_NAME }}
           GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
 
       - name: Google Auth
@@ -66,7 +66,7 @@ jobs:
             --allow-unauthenticated \
             --set-env-vars="PUBLIC_SUPABASE_URL=${{ secrets.PUBLIC_SUPABASE_URL }}" \
             --set-env-vars="PUBLIC_SUPABASE_ANON_KEY=${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}" \
-            --set-env-vars="GITHUB_TOKEN=${{ secrets.GH_API_TOKEN }}" \
-            --set-env-vars="GITHUB_REPO_OWNER=${{ secrets.GH_REPO_OWNER }}" \
-            --set-env-vars="GITHUB_REPO_NAME=${{ secrets.GH_REPO_NAME }}" \
+            --set-env-vars="GITHUB_TOKEN=${{ secrets.GITHUB_API_TOKEN }}" \
+            --set-env-vars="GITHUB_REPO_OWNER=${{ secrets.GITHUB_REPO_OWNER }}" \
+            --set-env-vars="GITHUB_REPO_NAME=${{ secrets.GITHUB_REPO_NAME }}" \
             --set-env-vars="GOOGLE_AI_API_KEY=${{ secrets.GOOGLE_AI_API_KEY }}"
