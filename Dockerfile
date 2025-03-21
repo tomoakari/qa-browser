@@ -24,14 +24,14 @@ RUN npm ci --omit=dev
 
 # ビルドステージからビルド済みのアプリケーションをコピー
 COPY --from=build /app/build ./build
-COPY --from=build /app/node_modules/.svelte-kit/output ./node_modules/.svelte-kit/output
+COPY --from=build /app/package.json ./package.json
 
 # 環境変数を設定
 ENV NODE_ENV=production
 ENV PORT=8080
 
 # アプリケーションを実行
-CMD ["node", "build"]
+CMD ["node", "build/index.js"]
 
 # Dockerコンテナがリッスンするポートを指定
 EXPOSE 8080
