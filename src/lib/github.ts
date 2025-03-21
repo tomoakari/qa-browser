@@ -1,9 +1,9 @@
 import { Octokit } from 'octokit';
 
 // 環境変数から値を取得
-const githubToken = import.meta.env.GITHUB_TOKEN;
-const repoOwner = import.meta.env.GITHUB_REPO_OWNER;
-const repoName = import.meta.env.GITHUB_REPO_NAME;
+const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
+const repoOwner = import.meta.env.VITE_GITHUB_REPO_OWNER;
+const repoName = import.meta.env.VITE_GITHUB_REPO_NAME;
 
 // 環境変数が設定されていない場合はエラーを表示
 if (!githubToken || !repoOwner || !repoName) {

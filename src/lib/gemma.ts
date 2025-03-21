@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // 環境変数から値を取得
-const apiKey = import.meta.env.GOOGLE_AI_API_KEY;
+const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
 
 // 環境変数が設定されていない場合はエラーを表示
 if (!apiKey) {

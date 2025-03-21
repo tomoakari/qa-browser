@@ -31,9 +31,9 @@ class GithubMcpServer {
     );
 
     // 環境変数から値を取得
-    const githubToken = process.env.GITHUB_TOKEN || '';
-    this.repoOwner = process.env.GITHUB_REPO_OWNER || '';
-    this.repoName = process.env.GITHUB_REPO_NAME || '';
+    const githubToken = process.env.VITE_GITHUB_TOKEN || '';
+    this.repoOwner = process.env.VITE_GITHUB_REPO_OWNER || '';
+    this.repoName = process.env.VITE_GITHUB_REPO_NAME || '';
 
     // 環境変数が設定されていない場合はエラーを表示
     if (!githubToken || !this.repoOwner || !this.repoName) {
