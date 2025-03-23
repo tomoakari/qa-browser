@@ -38,6 +38,9 @@ class GithubMcpServer {
     // 環境変数が設定されていない場合はエラーを表示
     if (!githubToken || !this.repoOwner || !this.repoName) {
       console.error('GitHub環境変数が設定されていません。');
+      console.error('TOKEN:', githubToken ? '設定済み' : '未設定');
+      console.error('OWNER:', this.repoOwner ? '設定済み' : '未設定');
+      console.error('REPO:', this.repoName ? '設定済み' : '未設定');
     }
 
     this.octokit = new Octokit({

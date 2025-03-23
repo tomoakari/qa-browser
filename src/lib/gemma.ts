@@ -1,14 +1,24 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// 環境変数から値を取得
-const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
+// 環境変数から値を取得（ブラウザとサーバーの両方で動作するように）
+const getApiKey = () => {
+  // サーバーサイドの場合
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env.VITE_GOOGLE_AI_API_KEY;
+  }
+  // クライアントサイドの場合
+  return import.meta.env.VITE_GOOGLE_AI_API_KEY;
+};
+
+const apiKey = getApiKey();
 
 // 環境変数が設定されていない場合はエラーを表示
 if (!apiKey) {
   console.error('Google AI API環境変数が設定されていません。');
+  console.error('API_KEY:', apiKey ? '設定済み' : '未設定');
 }
 
-const genAI = new GoogleGenerativeAI(apiKey);
+const genAI = new GoogleGenerativeAI(apiKey || '');
 
 /**
  * Gemma3モデルを使用して質問に回答する

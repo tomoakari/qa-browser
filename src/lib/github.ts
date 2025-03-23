@@ -1,17 +1,47 @@
 import { Octokit } from 'octokit';
 
-// 環境変数から値を取得
-const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
-const repoOwner = import.meta.env.VITE_GITHUB_REPO_OWNER;
-const repoName = import.meta.env.VITE_GITHUB_REPO_NAME;
+// 環境変数から値を取得（ブラウザとサーバーの両方で動作するように）
+const getGithubToken = () => {
+  // サーバーサイドの場合
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env.VITE_GITHUB_TOKEN;
+  }
+  // クライアントサイドの場合
+  return import.meta.env.VITE_GITHUB_TOKEN;
+};
+
+const getRepoOwner = () => {
+  // サーバーサイドの場合
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env.VITE_GITHUB_REPO_OWNER;
+  }
+  // クライアントサイドの場合
+  return import.meta.env.VITE_GITHUB_REPO_OWNER;
+};
+
+const getRepoName = () => {
+  // サーバーサイドの場合
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env.VITE_GITHUB_REPO_NAME;
+  }
+  // クライアントサイドの場合
+  return import.meta.env.VITE_GITHUB_REPO_NAME;
+};
+
+const githubToken = getGithubToken();
+const repoOwner = getRepoOwner();
+const repoName = getRepoName();
 
 // 環境変数が設定されていない場合はエラーを表示
 if (!githubToken || !repoOwner || !repoName) {
   console.error('GitHub環境変数が設定されていません。');
+  console.error('TOKEN:', githubToken ? '設定済み' : '未設定');
+  console.error('OWNER:', repoOwner ? '設定済み' : '未設定');
+  console.error('REPO:', repoName ? '設定済み' : '未設定');
 }
 
 export const octokit = new Octokit({
-  auth: githubToken
+  auth: githubToken || ''
 });
 
 /**
