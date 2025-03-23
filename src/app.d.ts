@@ -15,6 +15,7 @@ declare global {
 		VITE_GITHUB_REPO_OWNER: string;
 		VITE_GITHUB_REPO_NAME: string;
 		VITE_GOOGLE_AI_API_KEY: string;
+		VITE_DEPLOY_ENV: string;
 	}
 }
 
