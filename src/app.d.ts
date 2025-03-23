@@ -11,10 +11,10 @@ declare global {
 	interface ImportMetaEnv {
 		PUBLIC_SUPABASE_URL: string;
 		PUBLIC_SUPABASE_ANON_KEY: string;
-		GITHUB_TOKEN: string;
-		GITHUB_REPO_OWNER: string;
-		GITHUB_REPO_NAME: string;
-		GOOGLE_AI_API_KEY: string;
+		VITE_GITHUB_TOKEN: string;
+		VITE_GITHUB_REPO_OWNER: string;
+		VITE_GITHUB_REPO_NAME: string;
+		VITE_GOOGLE_AI_API_KEY: string;
 	}
 }
 
