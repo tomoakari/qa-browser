@@ -29,4 +29,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('ANON_KEY:', supabaseAnonKey ? '設定済み' : '未設定');
 }
 
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+// デフォルト値を設定（開発環境用）
+const defaultUrl = 'https://example.supabase.co';
+const defaultAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4YW1wbGUiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYxNjQyMjU4MCwiZXhwIjoxOTMyMDAwMDAwfQ.example';
+
+// 環境変数が設定されていない場合はデフォルト値を使用
+export const supabase = createClient(
+  supabaseUrl || defaultUrl,
+  supabaseAnonKey || defaultAnonKey
+);
