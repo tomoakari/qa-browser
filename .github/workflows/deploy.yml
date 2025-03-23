@@ -53,23 +53,31 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      # Google Cloud Buildを使用してDockerイメージをビルド・プッシュ
+      - name: Create cloudbuild.yaml
+        run: |
+          cat > cloudbuild.yaml << EOF
+          steps:
+          - name: 'gcr.io/cloud-builders/docker'
+            args: [
+              'build',
+              '--build-arg', 'PUBLIC_SUPABASE_URL=${{ secrets.PUBLIC_SUPABASE_URL }}',
+              '--build-arg', 'PUBLIC_SUPABASE_ANON_KEY=${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}',
+              '--build-arg', 'VITE_GITHUB_TOKEN=${{ secrets.GH_API_TOKEN }}',
+              '--build-arg', 'VITE_GITHUB_REPO_OWNER=${{ secrets.GH_REPO_OWNER }}',
+              '--build-arg', 'VITE_GITHUB_REPO_NAME=${{ secrets.GH_REPO_NAME }}',
+              '--build-arg', 'VITE_GOOGLE_AI_API_KEY=${{ secrets.GOOGLE_AI_API_KEY }}',
+              '--build-arg', 'VITE_DEPLOY_ENV=production',
+              '-t', 'gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA',
+              '.'
+            ]
+          images:
+          - 'gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA'
+          EOF
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
-          build-args: |
-            PUBLIC_SUPABASE_URL=${{ secrets.PUBLIC_SUPABASE_URL }}
-            PUBLIC_SUPABASE_ANON_KEY=${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
-            VITE_GITHUB_TOKEN=${{ secrets.GH_API_TOKEN }}
-            VITE_GITHUB_REPO_OWNER=${{ secrets.GH_REPO_OWNER }}
-            VITE_GITHUB_REPO_NAME=${{ secrets.GH_REPO_NAME }}
-            VITE_GOOGLE_AI_API_KEY=${{ secrets.GOOGLE_AI_API_KEY }}
-            VITE_DEPLOY_ENV=production
+        run: |
+          gcloud builds submit --config=cloudbuild.yaml --verbosity=debug
 
       - name: Deploy to Cloud Run
         run: |
