@@ -1,26 +1,4 @@
 import { Octokit } from 'octokit';
-import { getSecret } from './secretManager';
-
-// Secret Managerから機密情報を取得するための関数
-async function getGithubCredentials(projectId?: string): Promise<{ token: string; owner: string; repo: string }> {
-  try {
-    // Secret Managerからシークレットを取得
-    const token = await getSecret('VITE_GITHUB_TOKEN', projectId);
-    const owner = await getSecret('VITE_GITHUB_REPO_OWNER', projectId);
-    const repo = await getSecret('VITE_GITHUB_REPO_NAME', projectId);
-    
-    return { token, owner, repo };
-  } catch (error) {
-    console.error('GitHub認証情報の取得に失敗しました:', error);
-    
-    // デフォルト値を返す（開発環境用）
-    return {
-      token: '',
-      owner: 'my-org',
-      repo: 'my-qa-repo'
-    };
-  }
-}
 
 // 環境変数から値を取得（ブラウザとサーバーの両方で動作するように）
 const getGithubToken = () => {
@@ -139,23 +117,17 @@ export async function searchRepository(query: string) {
 }
 
 /**
- * Secret Managerから認証情報を取得して更新する関数
- * @param projectId プロジェクトID（省略可）
+ * Secret Managerから認証情報を取得して更新する関数のインターフェース
+ * 注意: この関数はサーバーサイドでのみ実行される
  */
 export async function initGithubWithSecretManager(projectId?: string): Promise<void> {
-  try {
-    // Secret Managerから認証情報を取得
-    const { token, owner, repo } = await getGithubCredentials(projectId);
-    
-    // 環境変数に設定
-    if (typeof process !== 'undefined' && process.env) {
-      process.env.VITE_GITHUB_TOKEN = token;
-      process.env.VITE_GITHUB_REPO_OWNER = owner;
-      process.env.VITE_GITHUB_REPO_NAME = repo;
-    }
-    
-    console.log('GitHub認証情報をSecret Managerから取得しました');
-  } catch (error) {
-    console.error('GitHub認証情報の初期化に失敗しました:', error);
+  // クライアントサイドでは何もしない
+  if (typeof window !== 'undefined') {
+    console.warn('initGithubWithSecretManager関数はクライアントサイドでは使用できません');
+    return;
   }
+  
+  // サーバーサイドでは実際の実装を使用
+  const { initGithubWithSecretManager: serverInitGithub } = await import('./server/github');
+  return serverInitGithub(projectId);
 }

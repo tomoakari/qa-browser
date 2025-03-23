@@ -1,22 +1,4 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { getSecret } from './secretManager';
-
-// Secret Managerから機密情報を取得するための関数
-async function getGemmaCredentials(projectId?: string): Promise<{ apiKey: string }> {
-  try {
-    // Secret Managerからシークレットを取得
-    const apiKey = await getSecret('VITE_GOOGLE_AI_API_KEY', projectId);
-    
-    return { apiKey };
-  } catch (error) {
-    console.error('Google AI API認証情報の取得に失敗しました:', error);
-    
-    // デフォルト値を返す（開発環境用）
-    return {
-      apiKey: 'dummy-api-key'
-    };
-  }
-}
 
 // 環境変数から値を取得（ブラウザとサーバーの両方で動作するように）
 const getApiKey = () => {
@@ -77,21 +59,17 @@ ${question}
 }
 
 /**
- * Secret Managerから認証情報を取得して更新する関数
- * @param projectId プロジェクトID（省略可）
+ * Secret Managerから認証情報を取得して更新する関数のインターフェース
+ * 注意: この関数はサーバーサイドでのみ実行される
  */
 export async function initGemmaWithSecretManager(projectId?: string): Promise<void> {
-  try {
-    // Secret Managerから認証情報を取得
-    const { apiKey } = await getGemmaCredentials(projectId);
-    
-    // 環境変数に設定
-    if (typeof process !== 'undefined' && process.env) {
-      process.env.VITE_GOOGLE_AI_API_KEY = apiKey;
-    }
-    
-    console.log('Google AI API認証情報をSecret Managerから取得しました');
-  } catch (error) {
-    console.error('Google AI API認証情報の初期化に失敗しました:', error);
+  // クライアントサイドでは何もしない
+  if (typeof window !== 'undefined') {
+    console.warn('initGemmaWithSecretManager関数はクライアントサイドでは使用できません');
+    return;
   }
+  
+  // サーバーサイドでは実際の実装を使用
+  const { initGemmaWithSecretManager: serverInitGemma } = await import('./server/gemma');
+  return serverInitGemma(projectId);
 }

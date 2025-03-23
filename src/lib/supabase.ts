@@ -1,24 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import { getSecret } from './secretManager';
-
-// Secret Managerから機密情報を取得するための関数
-async function getSupabaseCredentials(projectId?: string): Promise<{ url: string; key: string }> {
-  try {
-    // Secret Managerからシークレットを取得
-    const url = await getSecret('PUBLIC_SUPABASE_URL', projectId);
-    const key = await getSecret('PUBLIC_SUPABASE_ANON_KEY', projectId);
-    
-    return { url, key };
-  } catch (error) {
-    console.error('Supabase認証情報の取得に失敗しました:', error);
-    
-    // デフォルト値を返す（開発環境用）
-    return {
-      url: 'https://example.supabase.co',
-      key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4YW1wbGUiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYxNjQyMjU4MCwiZXhwIjoxOTMyMDAwMDAwfQ.example'
-    };
-  }
-}
 
 // 環境変数から値を取得（ブラウザとサーバーの両方で動作するように）
 const getSupabaseUrl = () => {
@@ -61,20 +41,18 @@ export const supabase = createClient(
   supabaseAnonKey || defaultAnonKey
 );
 
-// Secret Managerから認証情報を取得して更新する関数
+/**
+ * Secret Managerから認証情報を取得して更新する関数のインターフェース
+ * 注意: この関数はサーバーサイドでのみ実行される
+ */
 export async function initSupabaseWithSecretManager(projectId?: string): Promise<void> {
-  try {
-    // Secret Managerから認証情報を取得
-    const { url, key } = await getSupabaseCredentials(projectId);
-    
-    // 環境変数に設定
-    if (typeof process !== 'undefined' && process.env) {
-      process.env.PUBLIC_SUPABASE_URL = url;
-      process.env.PUBLIC_SUPABASE_ANON_KEY = key;
-    }
-    
-    console.log('Supabase認証情報をSecret Managerから取得しました');
-  } catch (error) {
-    console.error('Supabase認証情報の初期化に失敗しました:', error);
+  // クライアントサイドでは何もしない
+  if (typeof window !== 'undefined') {
+    console.warn('initSupabaseWithSecretManager関数はクライアントサイドでは使用できません');
+    return;
   }
+  
+  // サーバーサイドでは実際の実装を使用
+  const { initSupabaseWithSecretManager: serverInitSupabase } = await import('./server/supabase');
+  return serverInitSupabase(projectId);
 }
