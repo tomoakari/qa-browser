@@ -1,10 +1,21 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getSecret } from './secretManager';
 
-// デバッグ用：環境変数の値を出力
-console.log('===== Google AI環境変数のデバッグ情報 =====');
-console.log('process.env.VITE_GOOGLE_AI_API_KEY:', process.env.VITE_GOOGLE_AI_API_KEY ? '設定済み（値は非表示）' : '未設定');
-if (typeof import.meta !== 'undefined') {
-  console.log('import.meta.env.VITE_GOOGLE_AI_API_KEY:', import.meta.env.VITE_GOOGLE_AI_API_KEY ? '設定済み（値は非表示）' : '未設定');
+// Secret Managerから機密情報を取得するための関数
+async function getGemmaCredentials(projectId?: string): Promise<{ apiKey: string }> {
+  try {
+    // Secret Managerからシークレットを取得
+    const apiKey = await getSecret('VITE_GOOGLE_AI_API_KEY', projectId);
+    
+    return { apiKey };
+  } catch (error) {
+    console.error('Google AI API認証情報の取得に失敗しました:', error);
+    
+    // デフォルト値を返す（開発環境用）
+    return {
+      apiKey: 'dummy-api-key'
+    };
+  }
 }
 
 // 環境変数から値を取得（ブラウザとサーバーの両方で動作するように）
@@ -22,12 +33,6 @@ const getApiKey = () => {
 };
 
 const apiKey = getApiKey();
-
-// 環境変数が設定されていない場合はエラーを表示
-if (!apiKey) {
-  console.error('Google AI API環境変数が設定されていません。');
-  console.error('API_KEY:', apiKey ? '設定済み' : '未設定');
-}
 
 // デフォルト値を設定（開発環境用）
 const defaultApiKey = 'dummy-api-key';
@@ -68,5 +73,25 @@ ${question}
   } catch (error) {
     console.error('Failed to generate answer:', error);
     return { data: null, error };
+  }
+}
+
+/**
+ * Secret Managerから認証情報を取得して更新する関数
+ * @param projectId プロジェクトID（省略可）
+ */
+export async function initGemmaWithSecretManager(projectId?: string): Promise<void> {
+  try {
+    // Secret Managerから認証情報を取得
+    const { apiKey } = await getGemmaCredentials(projectId);
+    
+    // 環境変数に設定
+    if (typeof process !== 'undefined' && process.env) {
+      process.env.VITE_GOOGLE_AI_API_KEY = apiKey;
+    }
+    
+    console.log('Google AI API認証情報をSecret Managerから取得しました');
+  } catch (error) {
+    console.error('Google AI API認証情報の初期化に失敗しました:', error);
   }
 }

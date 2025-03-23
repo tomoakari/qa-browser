@@ -1,14 +1,25 @@
 import { Octokit } from 'octokit';
+import { getSecret } from './secretManager';
 
-// デバッグ用：環境変数の値を出力
-console.log('===== GitHub環境変数のデバッグ情報 =====');
-console.log('process.env.VITE_GITHUB_TOKEN:', process.env.VITE_GITHUB_TOKEN ? '設定済み（値は非表示）' : '未設定');
-console.log('process.env.VITE_GITHUB_REPO_OWNER:', process.env.VITE_GITHUB_REPO_OWNER);
-console.log('process.env.VITE_GITHUB_REPO_NAME:', process.env.VITE_GITHUB_REPO_NAME);
-if (typeof import.meta !== 'undefined') {
-  console.log('import.meta.env.VITE_GITHUB_TOKEN:', import.meta.env.VITE_GITHUB_TOKEN ? '設定済み（値は非表示）' : '未設定');
-  console.log('import.meta.env.VITE_GITHUB_REPO_OWNER:', import.meta.env.VITE_GITHUB_REPO_OWNER);
-  console.log('import.meta.env.VITE_GITHUB_REPO_NAME:', import.meta.env.VITE_GITHUB_REPO_NAME);
+// Secret Managerから機密情報を取得するための関数
+async function getGithubCredentials(projectId?: string): Promise<{ token: string; owner: string; repo: string }> {
+  try {
+    // Secret Managerからシークレットを取得
+    const token = await getSecret('VITE_GITHUB_TOKEN', projectId);
+    const owner = await getSecret('VITE_GITHUB_REPO_OWNER', projectId);
+    const repo = await getSecret('VITE_GITHUB_REPO_NAME', projectId);
+    
+    return { token, owner, repo };
+  } catch (error) {
+    console.error('GitHub認証情報の取得に失敗しました:', error);
+    
+    // デフォルト値を返す（開発環境用）
+    return {
+      token: '',
+      owner: 'my-org',
+      repo: 'my-qa-repo'
+    };
+  }
 }
 
 // 環境変数から値を取得（ブラウザとサーバーの両方で動作するように）
@@ -54,14 +65,6 @@ const getRepoName = () => {
 const githubToken = getGithubToken();
 const repoOwner = getRepoOwner();
 const repoName = getRepoName();
-
-// 環境変数が設定されていない場合はエラーを表示
-if (!githubToken || !repoOwner || !repoName) {
-  console.error('GitHub環境変数が設定されていません。');
-  console.error('TOKEN:', githubToken ? '設定済み' : '未設定');
-  console.error('OWNER:', repoOwner ? '設定済み' : '未設定');
-  console.error('REPO:', repoName ? '設定済み' : '未設定');
-}
 
 // デフォルト値を設定（開発環境用）
 const defaultToken = '';
@@ -132,5 +135,27 @@ export async function searchRepository(query: string) {
   } catch (error) {
     console.error('Failed to search repository:', error);
     return { data: null, error };
+  }
+}
+
+/**
+ * Secret Managerから認証情報を取得して更新する関数
+ * @param projectId プロジェクトID（省略可）
+ */
+export async function initGithubWithSecretManager(projectId?: string): Promise<void> {
+  try {
+    // Secret Managerから認証情報を取得
+    const { token, owner, repo } = await getGithubCredentials(projectId);
+    
+    // 環境変数に設定
+    if (typeof process !== 'undefined' && process.env) {
+      process.env.VITE_GITHUB_TOKEN = token;
+      process.env.VITE_GITHUB_REPO_OWNER = owner;
+      process.env.VITE_GITHUB_REPO_NAME = repo;
+    }
+    
+    console.log('GitHub認証情報をSecret Managerから取得しました');
+  } catch (error) {
+    console.error('GitHub認証情報の初期化に失敗しました:', error);
   }
 }

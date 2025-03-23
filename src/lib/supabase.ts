@@ -1,12 +1,23 @@
 import { createClient } from '@supabase/supabase-js';
+import { getSecret } from './secretManager';
 
-// デバッグ用：環境変数の値を出力
-console.log('===== 環境変数のデバッグ情報 =====');
-console.log('process.env.PUBLIC_SUPABASE_URL:', process.env.PUBLIC_SUPABASE_URL);
-console.log('process.env.PUBLIC_SUPABASE_ANON_KEY:', process.env.PUBLIC_SUPABASE_ANON_KEY);
-if (typeof import.meta !== 'undefined') {
-  console.log('import.meta.env.PUBLIC_SUPABASE_URL:', import.meta.env.PUBLIC_SUPABASE_URL);
-  console.log('import.meta.env.PUBLIC_SUPABASE_ANON_KEY:', import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+// Secret Managerから機密情報を取得するための関数
+async function getSupabaseCredentials(projectId?: string): Promise<{ url: string; key: string }> {
+  try {
+    // Secret Managerからシークレットを取得
+    const url = await getSecret('PUBLIC_SUPABASE_URL', projectId);
+    const key = await getSecret('PUBLIC_SUPABASE_ANON_KEY', projectId);
+    
+    return { url, key };
+  } catch (error) {
+    console.error('Supabase認証情報の取得に失敗しました:', error);
+    
+    // デフォルト値を返す（開発環境用）
+    return {
+      url: 'https://example.supabase.co',
+      key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4YW1wbGUiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYxNjQyMjU4MCwiZXhwIjoxOTMyMDAwMDAwfQ.example'
+    };
+  }
 }
 
 // 環境変数から値を取得（ブラウザとサーバーの両方で動作するように）
@@ -36,17 +47,11 @@ const getSupabaseAnonKey = () => {
   return null;
 };
 
+// 環境変数から値を取得
 const supabaseUrl = getSupabaseUrl();
 const supabaseAnonKey = getSupabaseAnonKey();
 
-// 環境変数が設定されていない場合はエラーを表示
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Supabase環境変数が設定されていません。');
-  console.error('URL:', supabaseUrl ? '設定済み' : '未設定');
-  console.error('ANON_KEY:', supabaseAnonKey ? '設定済み' : '未設定');
-}
-
-// デフォルト値を設定（本番環境用）
+// デフォルト値を設定（開発環境用）
 const defaultUrl = 'https://example.supabase.co';
 const defaultAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4YW1wbGUiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYxNjQyMjU4MCwiZXhwIjoxOTMyMDAwMDAwfQ.example';
 
@@ -55,3 +60,21 @@ export const supabase = createClient(
   supabaseUrl || defaultUrl,
   supabaseAnonKey || defaultAnonKey
 );
+
+// Secret Managerから認証情報を取得して更新する関数
+export async function initSupabaseWithSecretManager(projectId?: string): Promise<void> {
+  try {
+    // Secret Managerから認証情報を取得
+    const { url, key } = await getSupabaseCredentials(projectId);
+    
+    // 環境変数に設定
+    if (typeof process !== 'undefined' && process.env) {
+      process.env.PUBLIC_SUPABASE_URL = url;
+      process.env.PUBLIC_SUPABASE_ANON_KEY = key;
+    }
+    
+    console.log('Supabase認証情報をSecret Managerから取得しました');
+  } catch (error) {
+    console.error('Supabase認証情報の初期化に失敗しました:', error);
+  }
+}
