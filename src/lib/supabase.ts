@@ -40,19 +40,3 @@ export const supabase = createClient(
   supabaseUrl || defaultUrl,
   supabaseAnonKey || defaultAnonKey
 );
-
-/**
- * Secret Managerから認証情報を取得して更新する関数のインターフェース
- * 注意: この関数はサーバーサイドでのみ実行される
- */
-export async function initSupabaseWithSecretManager(projectId?: string): Promise<void> {
-  // クライアントサイドでは何もしない
-  if (typeof window !== 'undefined') {
-    console.warn('initSupabaseWithSecretManager関数はクライアントサイドでは使用できません');
-    return;
-  }
-  
-  // サーバーサイドでは実際の実装を使用
-  const { initSupabaseWithSecretManager: serverInitSupabase } = await import('./server/supabase');
-  return serverInitSupabase(projectId);
-}
